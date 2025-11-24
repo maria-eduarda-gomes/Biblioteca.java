@@ -28,10 +28,9 @@ public class Biblioteca {
             System.out.println("Nenhum livro cadastrado.");
             return;
         }
-        livros.forEach(l ->
+        for (Livro l : livros)
             System.out.println(l.getId() + " - " + l.getTitulo() + " (" + l.getAutor() + ") - " +
-            (l.isDisponivel() ? "Disponível" : "Emprestado"))
-        );
+                (l.isDisponivel() ? "Disponível" : "Emprestado"));
     }
 
     public void listarUsuarios() {
@@ -39,9 +38,8 @@ public class Biblioteca {
             System.out.println("Nenhum usuário cadastrado.");
             return;
         }
-        usuarios.forEach(u ->
-            System.out.println(u.getId() + " - " + u.getNome())
-        );
+        for (Usuario u : usuarios)
+            System.out.println(u.getId() + " - " + u.getNome());
     }
 
     public void emprestarLivro(int livroId, int usuarioId, String data) {
@@ -99,24 +97,17 @@ public class Biblioteca {
         return null;
     }
 
-    public void salvar() {
-        salvarArquivo("livros.txt", livros);
-        salvarArquivo("usuarios.txt", usuarios);
-        salvarArquivo("emprestimos.txt", emprestimos);
+    public void salvarTudo() {
+        salvarLivros();
+        salvarUsuarios();
+        salvarEmprestimos();
         System.out.println("Dados salvos.");
     }
 
-    private void salvarArquivo(String nome, List<?> lista) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(nome))) {
-            for (Object o : lista)
-                bw.write(o.toString() + "\n");
-        } catch (IOException e) { }
-    }
-
-    public void carregar() {
-        livros = carregarLivros();
-        usuarios = carregarUsuarios();
-        emprestimos = carregarEmprestimos();
+    public void carregarTudo() {
+        carregarLivros();
+        carregarUsuarios();
+        carregarEmprestimos();
 
         idLivro = livros.size() + 1;
         idUsuario = usuarios.size() + 1;
@@ -125,33 +116,72 @@ public class Biblioteca {
         System.out.println("Dados carregados.");
     }
 
-    private List<Livro> carregarLivros() {
-        List<Livro> lista = new ArrayList<>();
+    public void salvarLivros() {
+        try (PrintWriter pw = new PrintWriter(new FileWriter("livros.txt"))) {
+            for (Livro l : livros)
+                pw.println(l.getId() + ";" + l.getTitulo() + ";" + l.getAutor() + ";" + l.isDisponivel());
+        } catch (Exception e) {
+            System.out.println("Erro ao salvar livros.");
+        }
+    }
+
+    public void salvarUsuarios() {
+        try (PrintWriter pw = new PrintWriter(new FileWriter("usuarios.txt"))) {
+            for (Usuario u : usuarios)
+                pw.println(u.getId() + ";" + u.getNome());
+        } catch (Exception e) {
+            System.out.println("Erro ao salvar usuários.");
+        }
+    }
+
+    public void salvarEmprestimos() {
+        try (PrintWriter pw = new PrintWriter(new FileWriter("emprestimos.txt"))) {
+            for (Emprestimo e : emprestimos)
+                pw.println(e.getId() + ";" + e.getLivroId() + ";" + e.getUsuarioId() + ";" + e.getDataEmprestimo() + ";" + e.getDataDevolucao());
+        } catch (Exception e) {
+            System.out.println("Erro ao salvar empréstimos.");
+        }
+    }
+
+    public void carregarLivros() {
+        livros.clear();
         try (BufferedReader br = new BufferedReader(new FileReader("livros.txt"))) {
             String linha;
-            while ((linha = br.readLine()) != null)
-                lista.add(Livro.fromString(linha));
-        } catch (IOException e) { }
-        return lista;
+            while ((linha = br.readLine()) != null) {
+                String[] d = linha.split(";");
+                Livro l = new Livro(Integer.parseInt(d[0]), d[1], d[2], Boolean.parseBoolean(d[3]));
+                livros.add(l);
+            }
+        } catch (Exception e) { }
     }
 
-    private List<Usuario> carregarUsuarios() {
-        List<Usuario> lista = new ArrayList<>();
+    public void carregarUsuarios() {
+        usuarios.clear();
         try (BufferedReader br = new BufferedReader(new FileReader("usuarios.txt"))) {
             String linha;
-            while ((linha = br.readLine()) != null)
-                lista.add(Usuario.fromString(linha));
-        } catch (IOException e) { }
-        return lista;
+            while ((linha = br.readLine()) != null) {
+                String[] d = linha.split(";");
+                Usuario u = new Usuario(Integer.parseInt(d[0]), d[1]);
+                usuarios.add(u);
+            }
+        } catch (Exception e) { }
     }
 
-    private List<Emprestimo> carregarEmprestimos() {
-        List<Emprestimo> lista = new ArrayList<>();
+    public void carregarEmprestimos() {
+        emprestimos.clear();
         try (BufferedReader br = new BufferedReader(new FileReader("emprestimos.txt"))) {
             String linha;
-            while ((linha = br.readLine()) != null)
-                lista.add(Emprestimo.fromString(linha));
-        } catch (IOException e) { }
-        return lista;
+            while ((linha = br.readLine()) != null) {
+                String[] d = linha.split(";");
+                Emprestimo e = new Emprestimo(
+                    Integer.parseInt(d[0]),
+                    Integer.parseInt(d[1]),
+                    Integer.parseInt(d[2]),
+                    d[3],
+                    d[4]
+                );
+                emprestimos.add(e);
+            }
+        } catch (Exception e) { }
     }
 }
