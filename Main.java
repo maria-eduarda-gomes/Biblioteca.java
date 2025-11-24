@@ -6,7 +6,7 @@ public class Main {
         Scanner sc = new Scanner(System.in);
 
         while (true) {
-            System.out.println("\n===== SISTEMA DE BIBLIOTECA =====");
+            System.out.println("\n~ SISTEMA DE BIBLIOTECA ~");
             System.out.println("1. Cadastrar Livro");
             System.out.println("2. Listar Livros");
             System.out.println("3. Cadastrar Usuário");
